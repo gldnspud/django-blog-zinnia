@@ -22,8 +22,11 @@ from zinnia.comparison import pearson_score
 
 register = Library()
 
-vectors = VectorBuilder({'queryset': Entry.published.all(),
-                        'fields': ['title', 'excerpt', 'content']})
+vectors_factory = lambda : VectorBuilder({
+    'queryset': Entry.published.all(),
+    'fields': ['title', 'excerpt', 'content'],
+    })
+vectors = None
 cache_entries_related = {}
 
 
@@ -82,6 +85,9 @@ def get_similar_entries(context, number=5, template='zinnia/tags/similar_entries
     """Return similar entries"""
     global vectors
     global cache_entries_related
+
+    if vectors is None:
+        vectors = vectors_factory()
 
     def compute_related(object_id, dataset):
         object_vector = None
