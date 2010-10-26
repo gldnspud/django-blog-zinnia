@@ -12,8 +12,12 @@ from django.core.urlresolvers import reverse
 
 from zinnia.settings import PROTOCOL
 
-current_site = Site.objects.get_current()
-site = '%s://%s' % (PROTOCOL, current_site.domain)
+current_site_factory = lambda : Site.objects.get_current()
+site_factory = lambda : '%s://%s' % (PROTOCOL, current_site.domain)
+
+current_site = None
+site = None
+
 blog_url = ''
 blog_feed = ''
 
@@ -29,6 +33,12 @@ class DirectoryPinger(threading.Thread):
         self.entries = entries
         self.server_name = server_name
         self.server = xmlrpclib.ServerProxy(self.server_name)
+
+        global current_site
+        global site
+        if current_site is None:
+            current_site = current_site_factory()
+            site = site_factory()
 
         if not blog_url or not blog_feed:
             blog_url = '%s%s' % (site, reverse('zinnia_entry_archive_index'))
